@@ -10,14 +10,29 @@ const users = [
         password:"123456"
     },
     {
-        id:"random",
+        id:"random1",
         firstName:"suresh",
         lastName:"sharma",
         email:"surya@gmail.com",
         password:"123456"
     },
-
 ]
+
+const Todos = [
+    {
+        title:"buy book",
+        by:"random"
+    },
+    {
+        title:"write code",
+        by:"random1"
+    },
+    {
+        title:"record video",
+        by:"abcdefg"
+    },
+]
+
 
 const typeDefs = gql`
 type Query{
@@ -34,18 +49,36 @@ type Mutation{
     createUser(userNew:UserInput!):User
 }
 type User{
-    id:ID
-    firstName:String
-    lastName:String
-    email:String
+    id:ID!
+    firstName:String!
+    lastName:String!
+    email:String!
+    todos:[Todo]
+}
+
+type Todo{
+    title:String!
+    by:ID!
 }
 `
+
+
+
+
+
+
 const resolvers = {
     Query:{
         users:()=>users,
-        user:(parent,{id},context)=>{
+        user:(_,{id})=>{
             console.log(id)
         return users.find(item=>item.id == id)
+        }
+    },
+    User:{
+        todos:(parent)=>{
+            console.log(parent)
+           return Todos.filter(todo=>todo.by == parent.id)
         }
     },
     Mutation:{
@@ -59,6 +92,7 @@ const resolvers = {
         }
     }
 }
+
 
 const server = new ApolloServer({typeDefs, resolvers});
 
