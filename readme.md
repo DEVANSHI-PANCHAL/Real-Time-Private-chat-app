@@ -1,0 +1,1 @@
+this repository contains a real time chat application using grapghQl react and nodejs
