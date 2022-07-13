@@ -1,13 +1,43 @@
 import {ApolloServer,gql} from 'apollo-server'
 
+const users = [
+    {
+        id:1,
+        firstName:"mukesh",
+        lastName:"kumar",
+        email:"mukeshkumar@gmail.com",
+        password:"123456"
+    },
+    {
+        id:2,
+        firstName:"suresh",
+        lastName:"sharma",
+        email:"surya@gmail.com",
+        password:"123456"
+    },
+
+]
+
 const typeDefs = gql`
 type Query{
-    greet:String
+    users:[User]
+    user(id:ID!):User
+}
+
+type User{
+    id:ID
+    firstName:String
+    lastName:String
+    email:String
 }
 `
 const resolvers = {
     Query:{
-        greet:()=>"Hello world"
+        users:()=>users,
+        user:(parent,{id},context)=>{
+            console.log(id)
+        return users.find(item=>item.id == id)
+        }
     }
 }
 
