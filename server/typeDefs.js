@@ -11,7 +11,7 @@ const typeDefs = gql`
         password:String!
     }
     type Mutation{
-    
+        SignupUser(userNew:UserInput!):User
     }
     type User{
         id:ID!
