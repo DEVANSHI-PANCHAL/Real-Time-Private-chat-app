@@ -10,8 +10,16 @@ const typeDefs = gql`
         email:String!
         password:String!
     }
+    input UserSigninInput{
+        email:String!
+        password:String!
+    }
+    type Token{
+        token:String!
+    }
     type Mutation{
         SignupUser(userNew:UserInput!):User
+        SigninUser(userSignin:UserSigninInput!):Token
     }
     type User{
         id:ID!
