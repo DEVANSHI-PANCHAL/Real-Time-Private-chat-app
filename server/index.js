@@ -5,7 +5,14 @@ import resolvers from './resolvers.js'
 
 const server = new ApolloServer({
     typeDefs,
-    resolvers
+    resolvers,
+    context:({req})=>{
+        const {authorization} = req.headers
+        if(authorization){
+          const {userId} = jwt.verify(authorization,process.env,JWT_SECRET)
+          return {userId}
+        }
+    }
 });
 
 server.listen().then(({ url }) => {
