@@ -1,10 +1,46 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import { useParams } from 'react-router-dom'
 import { AppBar, Toolbar, Box, Avatar, Typography,TextField } from '@mui/material'
 import MessageCard from '../components/MessageCard'
 
+
 const ChatScreen = () => {
     const {id,name} = useParams()
+    const [messages,setMessages] =useState([])
+
+    const getAllMessages = () =>{
+        fetch('http://localhost:4000/'),{
+            method:"POST",
+            headers:{
+                "Content-Type":'application/json',
+                "Authorization":""
+            },
+            body:JSON.stringify({
+                query: `
+                query MessagesByUSer($receiverId: Int!) {
+                    messagesByUser(receiverId: $receiverId){
+                        id
+                        text
+                        receiverId
+                        senderId
+                        createdAt
+                    }
+                }
+                `,
+                variables:{
+                    "receiverId":3
+                }
+            })
+        }.then(res=>res.json())
+        .then(data=>{
+            console.log(data)
+
+            //update state
+        })
+    }
+    useEffect(()=>{
+        getAllMessages
+    })
   return (
    <Box 
    flexGrow={1}>
