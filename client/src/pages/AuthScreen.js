@@ -1,16 +1,22 @@
 import React,{useState,useRef} from 'react'
 import {Box,Stack,Typography,Button,TextField,Card,CircularProgress,Alert} from '@mui/material'
 import {useMutation} from '@apollo/client'
-import {SIGNUP_USER} from '../graphql/mutations';
+import {SIGNUP_USER,LOGIN_USER} from '../graphql/mutations';
 import { isOptionGroup } from '@mui/base';
 
-const AuthScreen = () => {
+const AuthScreen = ({setloggedIn}) => {
     const [showlogin,setShowLogin] = useState(true)
     const [formData,setFormData] = useState({})
     const authForm = useRef(null)
     const [signupUser,{data:signupData,loading:l1,error:e1}] = useMutation(SIGNUP_USER)
-    
-    if(l1){
+    const [loginUser,{data:loginData,loading:l2,error:e2}] = useMutation(LOGIN_USER,{
+        onCompleted(data){
+            localStorage.setItem("jwt",data.signinUser.token)
+            setloggedIn(true)
+        }
+    })
+  
+    if(l1 || l2){
         return (
         <Box
         display="flex"
@@ -35,7 +41,11 @@ const AuthScreen = () => {
     const handleSubmit =(e)=>{
         e.preventDefault()
         if(showlogin){
-            //signin user
+           loginUser({
+               variables:{
+                   userNew:formData
+               }
+           })
         }else{
             signupUser({
                 variables:{
@@ -63,6 +73,7 @@ const AuthScreen = () => {
         sx={{width:"400px"}}>
             {signupData && <Alert severity="success">{signupData.signupUser.firstName} signed up</Alert>}
             {e1 && <Alert severity="error">{e1.message}</Alert>}
+            {e2 && <Alert severity="error">{e2.message}</Alert>}
             <Typography variant="h5" textAlign="center">{showlogin?"Login":"Signup"}</Typography>
             {
                 !showlogin &&
@@ -74,6 +85,7 @@ const AuthScreen = () => {
                 type="text"
                 variant="standard"
                 onChange={handleChange}
+                required
                 />
                 <TextField
                 name="lastName"
@@ -81,6 +93,7 @@ const AuthScreen = () => {
                 type="text"
                 variant="standard"
                 onChange={handleChange}
+                required
                 />
                 
                 </>
@@ -91,6 +104,7 @@ const AuthScreen = () => {
                 type="email"
                 variant="standard"
                 onChange={handleChange}
+                required
                 />
                 <TextField
                 name="password"
@@ -98,6 +112,7 @@ const AuthScreen = () => {
                 type="password"
                 variant="standard"
                 onChange={handleChange}
+                required
                 />
                 <Typography textAlign="center" variant="subtitle1" onClick={()=>{
                     setShowLogin((preValue)=>!preValue)
