@@ -5,15 +5,11 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {BrowserRouter} from 'react-router-dom';
 import { ApolloClient, InMemoryCache, ApolloProvider, gql, createHttpLink } from '@apollo/client';
+
 import { setContext } from '@apollo/client/link/context';
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-
-
-
-const httpLink = createHttpLink({
-  uri: 'http://localhost:4000',
-});
+import { split , HttpLink } from '@apollo/client;'
+import { GraphQLWsLink} from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws'
 
 const authLink = setContext((_, { headers }) => {
 
@@ -26,11 +22,43 @@ const authLink = setContext((_, { headers }) => {
 });
 
 
+const httpLink = createHttpLink({
+  uri: 'http://localhost:4000',
+});
+
+const wsLink = new GraphQLWsLink(createClient({
+  url: 'ws://localhost:4000/graphql',
+}))
+
+const splitLink = split(
+  ({query}) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' && 
+      definition.operation === 'subscription'
+    )
+  },
+  wsLink,
+  authLink.concat(httpLink),
+)
+
+
+
+
 const client = new ApolloClient({
   // uri: 'http://localhost:4000',
-  link: authLink.concat(httpLink),
+  link: splitLink,
   cache: new InMemoryCache(),
 });
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+
+
+
+
+
 root.render(
   
   <React.StrictMode>
