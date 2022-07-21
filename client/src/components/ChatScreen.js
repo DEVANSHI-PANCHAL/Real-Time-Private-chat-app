@@ -1,13 +1,31 @@
 import React,{useState,useEffect} from 'react'
 import { useParams } from 'react-router-dom'
-import { AppBar, Toolbar, Box, Avatar, Typography,TextField } from '@mui/material'
+import { AppBar, Toolbar, Box,Stack, Avatar, Typography,TextField } from '@mui/material'
 import MessageCard from '../components/MessageCard'
-
+import { useQuery,useMutation } from '@apollo/client'
+import { GET_MSG } from '../graphql/queries/queries'
+import SendIcon from '@mui/icons-material/Send';
+import { SEND_MSG } from '../graphql/mutations'
 
 const ChatScreen = () => {
     const {id,name} = useParams()
+    const [text,setText] = useState("")
+    const [messages,setMessages] = useState([])
+    const {data,loading,error} = useQuery(GET_MSG,{
+        variables:{
+            receiverId: +id,
+        },
+        onCompleted(data){
+            setMessages(data.messagesByUser)
+        }
+    })
 
-
+   const [sendMessage] =  useMutation(SEND_MSG,{
+       onCompleted(data){
+           setMessages((prevMessages)=>[...prevMessages,data.createMessage])
+       }
+   })
+    console.log(data)
   
   return (
    <Box 
@@ -25,25 +43,33 @@ const ChatScreen = () => {
        height="80vh"
        padding="10px"
       sx={{ overflowY:"auto"}}>
-           <MessageCard text="Hi devanshi" date="123" direction="start"/>
-           <MessageCard text="Hi debu" date="123" direction="end"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
-           <MessageCard text="Hi bans" date="123" direction="start"/>
+         {
+             loading ? <Typography variant="h6" color="black">Loading...chats</Typography>
+             : messages.map(msg =>{
+                 return <MessageCard key={msg.createdAt} text={msg.text} date = {msg.createdAt} direction={msg.receiverId == +id ? "end" : "start"}/>
+             })
+         }
        </Box>
+       <Stack direction="row">
        <TextField
        placeholder="Enter a message"
        variant="standard"
        fullWidth
        multiline
-       rows={2}></TextField>
+       rows={2}
+       value={text}
+       onChange={e =>setText(e.target.value)}>
+       </TextField>
+       <SendIcon fontSize="large" onClick = {() =>{
+           sendMessage({
+               variables:{
+                   receiverId: +id,
+                   text:text
+               }
+           })
+       }}/>
+       </Stack>
+       
    </Box>
   )
 }

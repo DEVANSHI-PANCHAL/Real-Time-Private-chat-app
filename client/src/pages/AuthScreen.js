@@ -5,13 +5,15 @@ import {SIGNUP_USER,LOGIN_USER} from '../graphql/mutations';
 import { isOptionGroup } from '@mui/base';
 
 const AuthScreen = ({setloggedIn}) => {
-    const [showlogin,setShowLogin] = useState(true)
+    const [showLogin,setShowLogin] = useState(true)
     const [formData,setFormData] = useState({})
     const authForm = useRef(null)
-    const [signupUser,{data:signupData,loading:l1,error:e1}] = useMutation(SIGNUP_USER)
+    const [SignupUser,{data:signupData,loading:l1,error:e1}] = useMutation(SIGNUP_USER)
+    
     const [loginUser,{data:loginData,loading:l2,error:e2}] = useMutation(LOGIN_USER,{
         onCompleted(data){
-            localStorage.setItem("jwt",data.signinUser.token)
+            console.log(data)
+            localStorage.setItem("jwt",data.SigninUser.token)
             setloggedIn(true)
         }
     })
@@ -40,14 +42,14 @@ const AuthScreen = ({setloggedIn}) => {
 
     const handleSubmit =(e)=>{
         e.preventDefault()
-        if(showlogin){
+        if(showLogin){
            loginUser({
                variables:{
-                   userNew:formData
+                   userSignin:formData
                }
            })
         }else{
-            signupUser({
+            SignupUser({
                 variables:{
                     userNew:formData
                 }
@@ -71,12 +73,14 @@ const AuthScreen = ({setloggedIn}) => {
         direction="column"
         spacing={2}
         sx={{width:"400px"}}>
-            {signupData && <Alert severity="success">{signupData.signupUser.firstName} signed up</Alert>}
+
+            {signupData && <Alert severity="success">{signupData.SignupUser.firstName} signed up</Alert>}
             {e1 && <Alert severity="error">{e1.message}</Alert>}
             {e2 && <Alert severity="error">{e2.message}</Alert>}
-            <Typography variant="h5" textAlign="center">{showlogin?"Login":"Signup"}</Typography>
+
+            <Typography variant="h5" textAlign="center">{showLogin?"Login":"Signup"}</Typography>
             {
-                !showlogin &&
+                !showLogin &&
                 <>
                
                 <TextField
@@ -118,8 +122,8 @@ const AuthScreen = ({setloggedIn}) => {
                     setShowLogin((preValue)=>!preValue)
                     setFormData({})
                     authForm.current.reset()
-                }}>{showlogin? "Don't have any account yet? Signup here":"Already have an account? Login here"}</Typography>
-            <Button variant="outlined" type="submit">{showlogin?"Login":"Signup"}</Button>
+                }}>{showLogin? "Don't have any account yet? Signup here":"Already have an account? Login here"}</Typography>
+            <Button variant="outlined" type="submit">{showLogin?"Login":"Signup"}</Button>
         </Stack>
         </Card> 
     </Box>
