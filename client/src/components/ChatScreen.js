@@ -2,10 +2,12 @@ import React,{useState,useEffect} from 'react'
 import { useParams } from 'react-router-dom'
 import { AppBar, Toolbar, Box,Stack, Avatar, Typography,TextField } from '@mui/material'
 import MessageCard from '../components/MessageCard'
-import { useQuery,useMutation } from '@apollo/client'
+import { useQuery,useMutation, useSubscription } from '@apollo/client'
 import { GET_MSG } from '../graphql/queries/queries'
 import SendIcon from '@mui/icons-material/Send';
 import { SEND_MSG } from '../graphql/mutations'
+import { MSG_SUB } from '../graphql/subscriptions'
+
 
 const ChatScreen = () => {
     const {id,name} = useParams()
@@ -21,12 +23,20 @@ const ChatScreen = () => {
     })
 
    const [sendMessage] =  useMutation(SEND_MSG,{
-       onCompleted(data){
-           setMessages((prevMessages)=>[...prevMessages,data.createMessage])
-       }
+    
    })
     console.log(data)
   
+    const {data:subData} =useSubscription(MSG_SUB,{
+        onSubscriptionData({subscriptionData:{data}}){
+            // console.log(data)
+          
+                setMessages((prevMessages)=>[...prevMessages,data.messageAdded])
+            
+        }
+    })
+    // if (subData) console.log(subData)
+
   return (
    <Box 
    flexGrow={1}>
