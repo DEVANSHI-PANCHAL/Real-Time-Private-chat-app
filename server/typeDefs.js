@@ -41,6 +41,10 @@ const typeDefs = gql`
         email:String!
     
     }
+
+    type Subscription{
+        messageAdded:Message
+    }
 `
 
 export default typeDefs

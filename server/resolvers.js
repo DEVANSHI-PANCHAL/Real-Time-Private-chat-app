@@ -2,9 +2,13 @@ import jwt from 'jsonwebtoken'
 import pc from '@prisma/client'
 import {ApolloError,AuthenticationError,ForbiddenError} from 'apollo-server'
 import bcrypt from 'bcryptjs'
+import { PubSub } from 'graphql-subscriptions'
+
+const pubsub = new PubSub()
 
 const prisma = new pc.PrismaClient()
 
+const MESSAGE_ADDED = 'MESSAGE_ADDED'
 // console.log(process.env.JWT_SECRET)
 const resolvers = {
     Query:{
@@ -69,9 +73,15 @@ const resolvers = {
                     senderId:userId,
                 }
             })
+            pubsub.publish(MESSAGE_ADDED,{messageAdded:message})
             return message
         },
         
+    },
+    Subscription:{
+        messageAdded:{
+            subscribe:() => pubsub.asyncIterator(MESSAGE_ADDED)
+        }
     }
 }
 
